@@ -1,77 +1,80 @@
 import { Injectable } from '@nestjs/common';
-import {  students  } from '../db'
-import {  v4 as uuid  } from "uuid"
-import { CreateStudentDto, FindStudentResponseDto, StudentResponseDto, UpdateStudentDto } from './dto/student.dto';
+import { students } from '../db';
+import { v4 as uuid } from 'uuid';
+import {
+  CreateStudentDto,
+  FindStudentResponseDto,
+  StudentResponseDto,
+  UpdateStudentDto,
+} from './dto/student.dto';
 
 @Injectable()
 export class StudentService {
-    private students = students;
+  private students = students;
 
-    getStudents(): FindStudentResponseDto[]{
-        return this.students
-    }
+  getStudents(): FindStudentResponseDto[] {
+    return this.students;
+  }
 
-    getStudentById(studentId: string): FindStudentResponseDto {
-        return this.students.find(student => {
-            return student.id === studentId
-        })
-    }
+  getStudentById(studentId: string): FindStudentResponseDto {
+    return this.students.find((student) => {
+      return student.id === studentId;
+    });
+  }
 
-    createStudent(payload: CreateStudentDto): StudentResponseDto {
-        let newStudent = {
-            id: uuid(),
-            ...payload
-        }
+  createStudent(payload: CreateStudentDto): StudentResponseDto {
+    let newStudent = {
+      id: uuid(),
+      ...payload,
+    };
 
+    this.students.push(newStudent);
 
-        this.students.push(newStudent);
+    return newStudent;
+  }
 
-        return newStudent
-    }
+  updateStudent(payload: UpdateStudentDto, studentId: string) {
+    let updatedStudent: StudentResponseDto;
 
+    const updatedStudentList = this.students.map((student) => {
+      if (student.id === studentId) {
+        updatedStudent = {
+          id: studentId,
+          ...payload,
+        };
+        return updatedStudent;
+      } else return student;
+    });
 
-    updateStudent(payload: UpdateStudentDto, studentId: string) {
-        let updatedStudent: StudentResponseDto;
+    this.students = updatedStudentList;
 
-        const updatedStudentList = this.students.map(student => {
-            if(student.id === studentId){
-                updatedStudent = {
-                    id: studentId,
-                    ...payload
-                }
-                return updatedStudent
-            }else return student
-        })
+    return updatedStudent;
+  }
 
-        this.students = updatedStudentList;
+  getStudentsByTeacherId(teacherId: string): FindStudentResponseDto[] {
+    return this.students.filter((student) => {
+      return student.teacher === teacherId;
+    });
+  }
 
-        return updatedStudent
-    }
+  updateStudentTeacher(
+    teacherId: string,
+    studentId: string,
+  ): StudentResponseDto {
+    let updatedStudent: StudentResponseDto;
 
-    getStudentsByTeacherId(teacherId: string):FindStudentResponseDto[] {
-        return this.students.filter(student => {
-            return student.teacher === teacherId
-        })
-    }
+    const updatedStudentList = this.students.map((student) => {
+      if (student.id === studentId) {
+        updatedStudent = {
+          ...student,
+          teacher: teacherId,
+        };
+        return updatedStudent;
+      } else return student;
+    });
 
-    updateStudentTeacher(teacherId: string, studentId: string): StudentResponseDto {
-        let updatedStudent: StudentResponseDto;
+    this.students = updatedStudentList;
 
-        const updatedStudentList = this.students.map(student => {
-            if(student.id === studentId){
-                updatedStudent = {
-                    ...student,
-                    teacher: teacherId
-                }
-                return updatedStudent
-            }else return student
-        })
-
-        this.students = updatedStudentList;
-
-        return updatedStudent
-    }
+    return updatedStudent;
+  }
 }
-
-
-
